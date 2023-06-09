@@ -1,5 +1,6 @@
 import { Scene01 as Scene01 } from "./Scene01.js";
 import { Scene02 as Scene02 } from "./Scene02.js";
+import { Menu as Menu } from "./menu.js";
 
 var config = {
     type: Phaser.AUTO,
@@ -10,10 +11,10 @@ var config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 300},
-            debug: true 
+            debug: false
         }
     },
-    scene: [ Scene01, Scene02],
+    scene: [ Menu,Scene01, Scene02],
     scale: {
         parent: 'game_viewport',
         mode: Phaser.Scale.FIT,

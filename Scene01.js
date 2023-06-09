@@ -1,5 +1,6 @@
 import Bot from "./bot.js";
 
+
 export class Scene01 extends Phaser.Scene {
     constructor() {
         super("Scene01");
@@ -7,6 +8,7 @@ export class Scene01 extends Phaser.Scene {
         this.direction = 'right'; // par défaut, le bot avance vers la droite
         this.direction2 = 'right';
         this.direction3 = 'right'; // Nouvelle direction pour le troisième bot
+        this.lastCheckpoint = { x: 2050, y: 2752 };
     }
 
     preload() {
@@ -21,36 +23,53 @@ export class Scene01 extends Phaser.Scene {
         this.load.image('fond1', 'assets/fond1.png');
         this.load.image('fond2', 'assets/fond2.png');
         this.load.image('ciel', 'assets/ciel.png');
-
+        this.load.spritesheet('ennemi', 'assets/animennemi.png', { frameWidth: 95, frameHeight:146});
+        this.load.image('echelle', 'assets/echelle.png');
+        this.load.audio('musique', 'assets/musique.mp3');
+        
+        
     }
 
     create() {
+
+        this.musique = this.sound.add('musique', { loop: true });
+        this.musique.play();
+        
+        
 
         this.add.image(300, 450, 'fond1').setScrollFactor(0.5).setDepth(-1);
         this.add.image(1000, 450, 'fond2').setScrollFactor(0.6).setDepth(-2);
         this.add.image(300, 450, 'ciel').setScrollFactor(0.7).setDepth(-3);
       
+        const map = this.add.tilemap("map");
+        const tiles = map.addTilesetImage("tile.", "tileset");
+        const calque_fond = map.createLayer("Calque de Tuiles 2", tiles);
+        const calque_plateforme = map.createLayer("Calque de Tuiles 1", tiles);
+        const calque_details = map.createLayer("Calque de Tuiles 3", tiles);
+        const calque_fenêtre = map.createLayer("Calque de Tuiles 7", tiles);
+        
+        
+
       
       
-      
-        this.bot = this.physics.add.sprite(40*32, 72*32, 'bot');
+       
         this.bot2 = this.physics.add.sprite(101*32, 73*32, 'bot');
         this.bot3 = this.physics.add.sprite(75*32, 63*32, 'bot');
-        this.bot4 = this.physics.add.sprite(158*32, 46*32, 'bot');
-        this.bot5 = this.physics.add.sprite(146*32, 54*32, 'bot');
-        this.bot6 = this.physics.add.sprite(127*32, 71*32, 'bot');
-        this.bot7 = this.physics.add.sprite(151*32, 81*32, 'bot');
-        this.bot8 = this.physics.add.sprite(202*32, 68*32, 'bot');
-        this.bot9 = this.physics.add.sprite(230*32, 37*32, 'bot');
-        this.bot10 = this.physics.add.sprite(277*32, 56*32, 'bot');
-        this.bot11 = this.physics.add.sprite(325*32, 58*32, 'bot');
-        this.bot12 = this.physics.add.sprite(329*32, 73*32, 'bot');
-        this.bot13 = this.physics.add.sprite(385*32, 75*32, 'bot');
-        this.bot14 = this.physics.add.sprite(419*32, 72*32, 'bot');
-        this.bot15 = this.physics.add.sprite(366*32, 83*32, 'bot');
-        this.bot16 = this.physics.add.sprite(408*32, 83*32, 'bot');
-       // this.bot17 = this.physics.add.sprite(440*32, 63*32, 'bot');
-        this.bot18 = this.physics.add.sprite(367*32, 70*32, 'bot');
+        this.bot4 = this.physics.add.sprite(158*32, 44*32, 'bot');
+        this.bot5 = this.physics.add.sprite(146*32, 52*32, 'bot');
+        this.bot6 = this.physics.add.sprite(127*32, 69*32, 'bot');
+        this.bot7 = this.physics.add.sprite(151*32, 79*32, 'bot');
+        this.bot8 = this.physics.add.sprite(202*32, 66*32, 'bot');
+        this.bot9 = this.physics.add.sprite(230*32, 35*32, 'bot');
+        this.bot10 = this.physics.add.sprite(277*32, 54*32, 'bot');
+        this.bot11 = this.physics.add.sprite(325*32, 56*32, 'bot');
+        this.bot12 = this.physics.add.sprite(329*32, 71*32, 'bot');
+        this.bot13 = this.physics.add.sprite(385*32, 73*32, 'bot');
+        this.bot14 = this.physics.add.sprite(419*32, 70*32, 'bot');
+        this.bot15 = this.physics.add.sprite(366*32, 80*32, 'bot');
+        this.bot16 = this.physics.add.sprite(408*32, 80*32, 'bot');
+        //this.bot17 = this.physics.add.sprite(87*32, 90*32, 'bot');
+        this.bot18 = this.physics.add.sprite(367*32, 68*32, 'bot');
        
         this.cam = this.physics.add.sprite(98*32, 53*32, 'cam'); // Ajout du troisième bot
         this.cam2 = this.physics.add.sprite(249*32, 90*32, 'cam'); // Ajout du troisième bot
@@ -61,7 +80,7 @@ export class Scene01 extends Phaser.Scene {
 
         this.item = this.physics.add.sprite(169*32, 31*32, 'item'); 
         this.item2 = this.physics.add.sprite(209*32, 53*32, 'item'); 
-        this.box = this.physics.add.sprite(249*32, 89*32, 'box');
+        this.box = this.physics.add.sprite(244*32, 89*32, 'box');
         this.box.setImmovable(true); // Permet à la boîte d'être immobile initialement
         this.box2 = this.physics.add.sprite(269*32, 51*32, 'box');
         this.box2.setImmovable(true); // Permet à la boîte d'être immobile initialement
@@ -131,7 +150,7 @@ export class Scene01 extends Phaser.Scene {
 
 
 
-        this.player = this.physics.add.sprite(278*32, 36*32, 'perso').setDepth(100);
+        this.player = this.physics.add.sprite(3*32, 90*32, 'perso').setDepth(100);
         this.player.setBounce(0.2);
         this.player.safe = false;
         this.player.detected = false;
@@ -139,13 +158,7 @@ export class Scene01 extends Phaser.Scene {
         this.nbPierre = 0;
         this.pierrelance = false;
 
-        const map = this.add.tilemap("map");
-        const tiles = map.addTilesetImage("tile.", "tileset");
-        const calque_fond = map.createLayer("Calque de Tuiles 2", tiles);
-        const calque_plateforme = map.createLayer("Calque de Tuiles 1", tiles);
-        const calque_details = map.createLayer("Calque de Tuiles 3", tiles);
-        const calque_avant = map.createLayer("Calque de Tuiles 4", tiles);
-      
+       
 
         calque_plateforme.setCollisionByProperty({ estSolide: true });
 
@@ -160,29 +173,27 @@ export class Scene01 extends Phaser.Scene {
 
 
 
-        this.safe = this.add.rectangle(17*32, 89*32, 80, 80, "green");
+        this.safe = this.add.rectangle(82*32, 90*32, 80, 80, "green");
         this.rectDeDetectSafe = this.physics.add.existing(this.safe, true);
         this.safe2 = this.add.rectangle(253*32, 90*32, 80, 80, "green");
         this.rectDeDetectSafe2 = this.physics.add.existing(this.safe2, true);
         this.safe3 = this.add.rectangle(430*32, 63*32, 80, 80, "green");
         this.rectDeDetectSafe3 = this.physics.add.existing(this.safe3, true);
+        this.safe4 = this.add.rectangle(285*32, 90*32, 80, 80, "green");
+        this.rectDeDetectSafe4 = this.physics.add.existing(this.safe4, true);
+        this.safe5 = this.add.rectangle(220*32, 90*32, 80, 80, "green");
+        this.rectDeDetectSafe5 = this.physics.add.existing(this.safe5, true);
+        this.safe6 = this.add.rectangle(325*32, 58*32, 80, 80, "green");
+        this.rectDeDetectSafe6 = this.physics.add.existing(this.safe6, true);
+        this.safe7 = this.add.rectangle(168*32, 39*32, 80, 80, "green");
+        this.rectDeDetectSafe7 = this.physics.add.existing(this.safe7, true);
 
 
-        this.detect1 = this.add.rectangle(21*32, 83*32, 800, 500, "red");
-        this.rectDeDetect1 = this.physics.add.existing(this.detect1, true);
 
-        this.detect1B = this.add.rectangle(36*32, 73*32, 30, 30, "red");
-        this.rectDeDetect1B = this.physics.add.existing(this.detect1B, true);
-
-        this.detect2 = this.add.rectangle(61*32, 83*32, 800, 500, "red");
-        this.rectDeDetect2 = this.physics.add.existing(this.detect2, true);
-
-        this.detect2B = this.add.rectangle(46*32, 73*32, 30, 30, "red");
-        this.rectDeDetect2B = this.physics.add.existing(this.detect2B, true);
 
         
         this.physics.add.collider(this.player, calque_plateforme);
-        this.physics.add.collider(this.bot, calque_plateforme);
+       
         this.physics.add.collider(this.bot2, calque_plateforme);
         this.physics.add.collider(this.bot3, calque_plateforme);
         this.physics.add.collider(this.bot4, calque_plateforme);
@@ -248,16 +259,19 @@ export class Scene01 extends Phaser.Scene {
             frameRate: 8,
             repeat: -1
         });
+        this.anims.create({
+            key: 'rightEnnemi',
+            frames: this.anims.generateFrameNumbers('ennemi', { start: 11, end: 19 }),
+            frameRate: 8,
+            repeat: -1
+        });
 
         this.cursors = this.input.keyboard.createCursorKeys();
 
         this.physics.world.setBounds(0, 0, 116000, 116000);
         this.cameras.main.startFollow(this.player);
 
-        this.bot.setVelocityX(50);
-        this.bot.setCollideWorldBounds(true);
-        this.bot.body.setImmovable(true);
-
+      
         
         this.cam.setVelocityX(50); // Initialisation de la vitesse du troisième bot
         this.cam.setCollideWorldBounds(true);
@@ -277,16 +291,81 @@ export class Scene01 extends Phaser.Scene {
         this.botGroup = this.physics.add.group();
         this.physics.add.collider(this.botGroup, calque_plateforme);
         
-        this.botUn = new Bot(this,150*32, 29*32, 155*32,147*32,169*32,35*32,133*32,35*32);
+        this.botUn = new Bot(this,150*32, 28*32, 155*32,147*32,169*32,35*32,133*32,35*32);
         this.botGroup.add(this.botUn);
-        this.botDeux = new Bot(this,195*32, 78*32, 198*32,188*32,211*32,85*32,176*32,85*32);
+        this.botDeux = new Bot(this,195*32, 77*32, 198*32,188*32,211*32,85*32,176*32,85*32);
         this.botGroup.add(this.botDeux);
-        this.botTrois = new Bot(this,269*32, 79*32, 273*32,265*32,286*32,84*32,253*32,84*32);
+        this.botTrois = new Bot(this,269*32, 78*32, 273*32,265*32,286*32,84*32,253*32,84*32);
         this.botGroup.add(this.botTrois);
-        this.botQuatre = new Bot(this,326*32, 36*32, 331*32,322*32,344*32,35*32,310*32,35*32);
+        this.botQuatre = new Bot(this,326*32, 34*32, 331*32,322*32,344*32,35*32,310*32,35*32);
         this.botGroup.add(this.botQuatre);
-        this.botCinq = new Bot(this,422*32, 56*32, 426*32,418*32,439*32,57*32,405*32,57*32);
+        this.botCinq = new Bot(this,422*32, 55*32, 426*32,418*32,439*32,57*32,405*32,57*32);
         this.botGroup.add(this.botCinq);
+
+    const calque_avant = map.createLayer("Calque de Tuiles 4", tiles).setDepth(150);
+    const calquelumiere = map.createLayer("Calque de Tuiles 5", tiles).setDepth(150);
+    const calquelumiere2 = map.createLayer("Calque de Tuiles 6", tiles).setDepth(150);
+
+    this.bot2.anims.play('rightEnnemi',true);
+    this.bot2.body.setOffset(0,75);
+
+    this.bot3.anims.play('rightEnnemi',true);
+    this.bot3.body.setOffset(0,75);
+
+    this.bot4.anims.play('rightEnnemi',true);
+    this.bot4.body.setOffset(0,75);
+
+    this.bot5.anims.play('rightEnnemi',true);
+    this.bot5.body.setOffset(0,75);
+
+    this.bot6.anims.play('rightEnnemi',true);
+    this.bot6.body.setOffset(0,75);
+
+    
+    this.bot7.anims.play('rightEnnemi',true);
+    this.bot7.body.setOffset(0,75);
+
+       
+    this.bot8.anims.play('rightEnnemi',true);
+    this.bot8.body.setOffset(0,75);
+
+        
+    this.bot9.anims.play('rightEnnemi',true);
+    this.bot9.body.setOffset(0,75);
+
+    this.bot10.anims.play('rightEnnemi',true);
+    this.bot10.body.setOffset(0,75);
+
+    this.bot11.anims.play('rightEnnemi',true);
+    this.bot11.body.setOffset(0,75);
+
+    this.bot12.anims.play('rightEnnemi',true);
+    this.bot12.body.setOffset(0,75);
+
+    this.bot13.anims.play('rightEnnemi',true);
+    this.bot13.body.setOffset(0,75);
+
+    this.bot14.anims.play('rightEnnemi',true);
+    this.bot14.body.setOffset(0,75);
+    
+    this.bot15.anims.play('rightEnnemi',true);
+    this.bot15.body.setOffset(0,75);
+
+
+    this.bot16.anims.play('rightEnnemi',true);
+    this.bot16.body.setOffset(0,75);
+
+    
+    this.bot18.anims.play('rightEnnemi',true);
+    this.bot18.body.setOffset(0,75);
+
+   // this.bot17.anims.play('rightEnnemi',true);
+    //this.bot17.body.setOffset(0,75);
+
+
+
+
+
 
 
 
@@ -401,7 +480,8 @@ export class Scene01 extends Phaser.Scene {
 
        if (this.player.body.velocity.y > 300) {
             // Le joueur a chuté d'une hauteur importante, redémarrer la scène
-            this.scene.restart();
+            this.player.setX(this.lastCheckpoint.x);
+            this.player.setY(this.lastCheckpoint.y);
         }
     
 
@@ -415,60 +495,13 @@ export class Scene01 extends Phaser.Scene {
              this.player.setVelocityY(-200);
          }*/
 
-        if (this.bot.body.blocked.right) {
-            this.bot.setVelocityX(0);
-            this.bot.flipX = true;
-            this.direction = 'left';
-
-            setTimeout(() => {
-                this.bot.setVelocityX(-50);
-                this.bot.flipX = false;
-                this.direction = 'right';
-            }, 3000);
-        } else if (this.bot.body.blocked.left) {
-            this.bot.setVelocityX(0);
-            this.bot.flipX = false;
-            this.direction = 'right';
-
-            setTimeout(() => {
-                this.bot.setVelocityX(50);
-                this.bot.flipX = true;
-                this.direction = 'left';
-            }, 3000);
-        }
+      
+        
         
 
 
         
-        if (this.physics.overlap(this.bot, this.rectDeDetect1B)) {
-            this.overlapDetect.active = true;
-            if (this.player.safe == false)
-                this.player.detected = true;
-            else
-                this.player.detected = false;
-        } else {
-            this.overlapDetect.active = false;
-        }
-
-        if (this.physics.overlap(this.player, this.rectDeDetectSafe) || this.physics.overlap(this.player, this.rectDeDetectSafe2) || this.physics.overlap(this.player, this.rectDeDetectSafe3)) {
-            this.player.safe = true;
-        } else {
-            this.player.safe = false;
-        }
-
-        if (this.physics.overlap(this.bot, this.rectDeDetect2B)) {
-            this.overlapDetect2.active = true;
-        } else {
-            this.overlapDetect2.active = false;
-        }
-
-    
-
-        if (this.bot.body.velocity.x > 0) {
-            this.direction = "right";
-        } else if (this.bot.body.velocity.x < 0) {
-            this.direction = "left";
-        }
+        
  
 
         //console.log(this.pierrelance);
@@ -557,7 +590,10 @@ export class Scene01 extends Phaser.Scene {
         });
     }
 
-
+    if (this.physics.overlap(this.player, this.rectDeDetectSafe)|| this.physics.overlap(this.player, this.rectDeDetectSafe2) || this.physics.overlap(this.player, this.rectDeDetectSafe3) || this.physics.overlap(this.player, this.rectDeDetectSafe4) || this.physics.overlap(this.player, this.rectDeDetectSafe5) || this.physics.overlap(this.player, this.rectDeDetectSafe6) || this.physics.overlap(this.player, this.rectDeDetectSafe7))  {
+        this.lastCheckpoint = { x: this.player.x, y: this.player.y };
+    }
+    
 }
 
     camUpdate(currentCam)
@@ -591,7 +627,7 @@ export class Scene01 extends Phaser.Scene {
          var distX = Math.abs(this.player.x - this.cam.x);
          var distY = Math.abs(this.player.y - this.cam.y);
  
-         if (distX < 50 && distY < 50) {
+         if (distX < 140 && distY < 140) {
              console.log("Player detected!");
              this.playerDetected();
          
@@ -632,7 +668,7 @@ export class Scene01 extends Phaser.Scene {
 
        
  
-         if (distX < 50 && distY < 50) {
+         if (distX < 140 && distY < 140) {
              console.log("Player detected!");
              this.playerDetected();
          
@@ -672,7 +708,7 @@ export class Scene01 extends Phaser.Scene {
 
        
  
-         if (distX < 50 && distY < 50) {
+         if (distX < 140 && distY < 140) {
              console.log("Player detected!");
              this.playerDetected();
          
@@ -730,6 +766,7 @@ export class Scene01 extends Phaser.Scene {
         } else if (this.bot2.body.velocity.x < 0) {
             this.direction2 = "left";
         }
+
         }
 
         bot3update ()
@@ -1364,7 +1401,7 @@ export class Scene01 extends Phaser.Scene {
                                     }
                                     }
                             
-                                   /* bot17update ()
+                                    /*bot17update ()
                                     {
                                         if (this.bot17.body.velocity.x > 0) {
                                             this.direction2 = "right";
@@ -1377,11 +1414,11 @@ export class Scene01 extends Phaser.Scene {
                                             
                                         //}
                                 
-                                        if (this.bot17.x >= 499*32) {
+                                        if (this.bot17.x >= 92*32) {
                                             this.direction2 = 'left';
                                             this.bot17.setVelocityX(-50);
                                             this.bot17.flipX = true;
-                                        } else if (this.bot17.x <= 494*32) {
+                                        } else if (this.bot17.x <= 72*32) {
                                             this.direction2 = 'right';
                                             this.bot17.setVelocityX(50);
                                             this.bot17.flipX = false;
@@ -1747,7 +1784,9 @@ cinematic1() {
 
     playerDetected() {
         if (!this.player.safe)
-            this.scene.restart();
+        this.player.setX(this.lastCheckpoint.x);
+        this.player.setY(this.lastCheckpoint.y);
+        
     }
 }
  
